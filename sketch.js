@@ -43,11 +43,20 @@ var knifeImage , fruit1, fruit2 ,fruit3,fruit4,fruit5, monsterImage, gameOverIma
 var gameOverSound ,knifeSwoosh;
 //
 
+//Quiz
+var access1, access2, access3, button1,button2,button3
+var accesscode1="50"
+var accesscode2="GEORGE WASHINGTON"
+var accesscode3="ENGLAND"
 
+var somMouseClick, somFail, somSucess
+var pontos = 0
+//
 
 function preload() {
   //Inicio
   backgroundImage = loadImage("./Cena1Imagens/Background.png");
+  backgroundImageEnd = loadImage("./Cena1Imagens/Background End.png");
   pc_img = loadAnimation("./Cena1Imagens/Personagem5.png")
   pc_animation = loadAnimation("./Cena1Imagens/Personagem1.png","./Cena1Imagens/Personagem2.png","./Cena1Imagens/Personagem3.png","./Cena1Imagens/Personagem4.png")
   BandeiraImg = loadImage("./Cena1Imagens/Bandeira1.png")
@@ -85,12 +94,18 @@ function preload() {
   knifeSwooshSound = loadSound("./CulinariaImagens/knifeSwoosh.mp3")
   //
 
+  //Quiz
+  somMouseClick=loadSound('./QuizImagens/mouseclick.mp3');
+  somFail=loadSound('./QuizImagens/fail.mp3');
+  somSucess=loadSound('./QuizImagens/sucess.mp3')
+  //
 
 }
 
 function setup() {
  canvas = createCanvas(1200,500);
  canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2);
+ 
  //Inicio
  pc = createSprite(50,430,20,30);
  pc.addAnimation("pcAndando", pc_animation)
@@ -128,14 +143,14 @@ function setup() {
   redCG = new Group();
 
   text1 = createElement("h1");
-  text1.html("Hamburguer: "+hamburguer+"/10");
+  text1.html("Hamburguer: "+hamburguer+"/5");
   //              1200       600      900     500       250         30
   text1.position(canvas.x + width / 2 +250, canvas.y + height / 2 - 220)
 
   text2 = createElement("h1");
-  text1.html("Press Up Arrow to Restart the game!");
+  text2.html("Press Up Arrow to Restart the game!");
   //              1200       600      900     500       250         30
-  text1.position(canvas.x + width / 2 -100, canvas.y + height / 2 -50)
+  text2.position(canvas.x + width / 2 -100, canvas.y + height / 2 -50)
   //
 
   //Jogo de Culinaria
@@ -151,7 +166,35 @@ function setup() {
     fruitGroup=createGroup();
     monsterGroup=createGroup();
   //
+
+  //Quiz
+  access1=createInput("")
+  //300,110 10000,600
+  access1.position(canvas.x+width/2-40,canvas.y+height/2-190)
+  access1.style("background","white")
+
+  access2=createInput("")
+  access2.position(canvas.x+width/2-40,canvas.y+height/2-39)
+  access2.style("background","white")
+
+  access3=createInput("")
+  access3.position(canvas.x+width/2-40,canvas.y+height/2+100)
+  access3.style("background","white")
+
+  button1=createImg("QuizImagens/botaoplay.png")
+  button1.position(canvas.x+width/2-40,canvas.y+height/2-160)
+  button1.size(50,50)
+
+  button2=createImg("QuizImagens//botaoplay.png")
+  button2.position(canvas.x+width/2-40,canvas.y+height/2-9)
+  button2.size(50,50)
+
+  button3=createImg("QuizImagens//botaoplay.png")
+  button3.position(canvas.x+width/2-40,canvas.y+height/2+130)
+  button3.size(50,50)
+  //
   esconderElementos()
+  esconderElementos2()
 }
 
 function draw() 
@@ -268,7 +311,7 @@ function draw()
       
 }else if (gameState === END) {
     gameOver.visible = true;
-    //text2.show()
+    text2.show()
   
     textSize(20);
     fill(255);
@@ -318,8 +361,15 @@ function draw()
        knifeSwooshSound.play();
 
        score=score+2;
-      
-    }
+      }else if(score == 30){
+      setTimeout( () => {
+        fruitGroup.destroyEach()
+        monsterGroup.destroyEach()
+        knife.visible = false
+        cena = 4
+        mostrarelementos()
+      }, 1000)
+      }
     else
     {
       if(monsterGroup.isTouching(knife)){
@@ -351,17 +401,38 @@ function draw()
   }
   
   textSize(25);
-  text("Points: "+ score + "/50",50,50);
+  text("Points: "+ score + "/30",50,50);
   }
   //Quiz
   if(cena === 4){
-    
-    
-  }
+    background("yellow")
+
+    perguntas()
+  
+    button1.mouseClicked(acaobutton1)
+    button2.mouseClicked(acaobutton2)
+    button3.mouseClicked(acaobutton3)
+    if(pontos===3){
+        clear()
+        
+        setTimeout(()=>{
+        cena=5
+        },1000)
+      }
+      textSize(20)
+      fill ("black")
+      text("Points:"+pontos,450,50)
+      
+    }
   //Fim do Jogo
   if(cena === 5){
-    
-    
+    background(backgroundImageEnd);
+    pc.visible = true
+    pc.x = 600
+    pc.y = 430
+    pc.changeAnimation("pcParado", pc_img)
+    edges = createEdgeSprites()
+    pc.collide(edges[3])
   }
   
   
@@ -410,6 +481,11 @@ function reset(){
   redCG.destroyEach();
   
   distance = 0;
+
+  text2.hide()
+  hamburguer = 0
+  text1.html("Hamburguer: "+hamburguer+"/5");
+  
  }
 //
 
@@ -472,9 +548,100 @@ function reset2(){
   score = 0
  }
 //
+
+//quiz
+function perguntas(){
+  textSize(15)
+    fill ("black")
+    text("States -- 25 X 2 - 100",300,70)
+
+    fill ("black")
+    text("How many states are there in the U.S",300,90)
+
+    fill ("black")
+    text("Presidents -- George + Capital",300,220)
+
+    fill ("black")
+    text("Who was the first president of the U.S",300,240)
+
+    fill ("black")
+    text("History -- genldna",300,370)
+
+    fill ("black")
+    text("Witch country colonized the U.S",300,390)
+}
+function autenticar(atualcode,code){
+  if(atualcode===code.toUpperCase())
+    return true
+  else
+   return false 
+}
+function acaobutton1(){
+  
+if(autenticar(accesscode1,access1.value())){
+  access1.hide()
+  button1.hide()
+  somSucess.play()
+  pontos++
+}else{
+somFail.play()
+}
+}
+function acaobutton2(){
+  if(autenticar(accesscode2,access2.value())){
+    access2.hide()
+    button2.hide()
+   somSucess.play()
+    pontos++
+  }
+  else{
+    somFail.play()
+  }
+  }
+  function acaobutton3(){
+    if(autenticar(accesscode3,access3.value())){
+      access3.hide()
+      button3.hide()
+     somSucess.play()
+      pontos++
+    }
+    else{
+      somFail.play()
+    }
+    }
+function esconderElementos2(){
+  access1.hide()
+  access2.hide()
+  access3.hide()
+  button1.hide()
+  button2.hide()
+  button3.hide()
+}
+function mostrarelementos(){
+  access1.show()
+  access2.show()
+  access3.show()
+  button1.show()
+  button2.show()
+  button3.show()
+}
+//
+
 function windowResized(){
   canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2);
   text1.position(canvas.x + width / 2 +250, canvas.y + height / 2 - 220)
+   access1.position(canvas.x+width/2-200,canvas.y+height/2-190)
+
+  access2.position(canvas.x+width/2-200,canvas.y+height/2-39)
+
+  access3.position(canvas.x+width/2-200,canvas.y+height/2+100)
+
+  button1.position(canvas.x+width/2-200,canvas.y+height/2-160)
+
+  button2.position(canvas.x+width/2-200,canvas.y+height/2-9)
+
+  button3.position(canvas.x+width/2-200,canvas.y+height/2+130)
+  
 }
 
 function esconderElementos(){
